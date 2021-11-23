@@ -24,10 +24,11 @@
 
 <script>
 import ChooseLocationCard from '@/components/choose-location-card/ChooseLocationCard.vue'
-
+import  VueApexCharts from 'vue-apexcharts';
 export default {
   components: {
     ChooseLocationCard,
+    VueApexCharts
   },
   data() {
     return {

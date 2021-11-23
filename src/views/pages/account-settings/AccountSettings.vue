@@ -1,98 +1,153 @@
 <template>
-  <v-card id="account-setting-card">
-    <!-- tabs -->
-    <v-tabs
-      v-model="tab"
-      show-arrows
-    >
-      <v-tab
-        v-for="tab in tabs"
-        :key="tab.icon"
-      >
-        <v-icon
-          size="20"
-          class="me-3"
-        >
-          {{ tab.icon }}
-        </v-icon>
-        <span>{{ tab.title }}</span>
-      </v-tab>
-    </v-tabs>
+  <v-card>
+    <v-card-title class="align-start">
+      <span>Biểu đồ biến đổi giá trung bình</span>
 
-    <!-- tabs item -->
-    <v-tabs-items v-model="tab">
-      <v-tab-item>
-        <account-settings-account :account-data="accountSettingData.account"></account-settings-account>
-      </v-tab-item>
-
-      <v-tab-item>
-        <account-settings-security></account-settings-security>
-      </v-tab-item>
-
-      <v-tab-item>
-        <account-settings-info :information-data="accountSettingData.information"></account-settings-info>
-      </v-tab-item>
-    </v-tabs-items>
+      <v-spacer></v-spacer>
+    </v-card-title>
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-radio-group v-model="viewBy" row @change="viewByChange">
+        <v-radio label="ngày" value="day"> </v-radio>
+        <v-radio label="tháng" value="month"> </v-radio>
+        <v-radio label="năm" value="year"> </v-radio>
+      </v-radio-group>
+    </v-card-actions>
+    <v-card-text>
+      <!-- Chart -->
+      <vue-apex-charts :options="chartOptions" :series="series" height="210"></vue-apex-charts>
+    </v-card-text>
   </v-card>
 </template>
 
 <script>
-import { mdiAccountOutline, mdiLockOpenOutline, mdiInformationOutline } from '@mdi/js'
-import { ref } from '@vue/composition-api'
-
-// demos
-import AccountSettingsAccount from './AccountSettingsAccount.vue'
-import AccountSettingsSecurity from './AccountSettingsSecurity.vue'
-import AccountSettingsInfo from './AccountSettingsInfo.vue'
+import VueApexCharts from 'vue-apexcharts'
+// eslint-disable-next-line object-curly-newline
+import { mdiDotsVertical, mdiTrendingUp, mdiCurrencyUsd } from '@mdi/js'
+import { getCurrentInstance } from '@vue/composition-api'
 
 export default {
   components: {
-    AccountSettingsAccount,
-    AccountSettingsSecurity,
-    AccountSettingsInfo,
+    VueApexCharts,
   },
-  setup() {
-    const tab = ref('')
-
-    // tabs
-    const tabs = [
-      { title: 'Account', icon: mdiAccountOutline },
-      { title: 'Security', icon: mdiLockOpenOutline },
-      { title: 'Info', icon: mdiInformationOutline },
-    ]
-
-    // account settings data
-    const accountSettingData = {
-      account: {
-        avatarImg: require('@/assets/images/avatars/1.png'),
-        username: 'johnDoe',
-        name: 'john Doe',
-        email: 'johnDoe@example.com',
-        role: 'Admin',
-        status: 'Active',
-        company: 'Google.inc',
-      },
-      information: {
-        bio: 'The name’s John Deo. I am a tireless seeker of knowledge, occasional purveyor of wisdom and also, coincidentally, a graphic designer. Algolia helps businesses across industries quickly create relevant 😎, scaLabel 😀, and lightning 😍 fast search and discovery experiences.',
-        birthday: 'February 22, 1995',
-        phone: '954-006-0844',
-        website: 'https://themeselection.com/',
-        country: 'USA',
-        languages: ['English', 'Spanish'],
-        gender: 'male',
-      },
-    }
-
+  data: function () {
     return {
-      tab,
-      tabs,
-      accountSettingData,
-      icons: {
-        mdiAccountOutline,
-        mdiLockOpenOutline,
-        mdiInformationOutline,
-      },
+      series: [],
+      chartOptions: {},
+      viewBy: 'month',
     }
+  },
+  methods: {
+    /**
+     * Thay đổi xem chart theo ngày / tháng / năm
+     */
+    viewByChange(value) {
+      this.createChartOptions(value)
+      this.createChartDatas(value)
+    },
+
+    // tạo chartOptions cho ApexCharts
+    createChartOptions(value) {
+      let tempChartOptions = {
+        chart: {
+          height: 350,
+          type: 'area',
+        },
+        dataLabels: {
+          enabled: false,
+        },
+        stroke: {
+          curve: 'smooth',
+        },
+        xaxis: {
+          type: 'category',
+          categories: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'],
+        },
+        tooltip: {
+          x: {
+            format: 'dd/MM/yy HH:mm',
+          },
+        },
+      }
+      if (value == 'day') {
+        tempChartOptions.xaxis.categories = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
+      } else if (value == 'month') {
+        tempChartOptions.xaxis.categories = [
+          'JAN',
+          'FEB',
+          'MAR',
+          'APR',
+          'MAY',
+          'JUN',
+          'JUL',
+          'AUG',
+          'SEP',
+          'OCT',
+          'NOV',
+          'DEC',
+        ]
+      } else if (value == 'year') {
+        tempChartOptions.xaxis.categories = ['2015', '2016', '2017', '2018', '2019', '2020', '2021']
+      }
+      this.chartOptions = tempChartOptions
+    },
+
+    createChartDatas(value) {
+      let tempChartDatas = [
+        {
+          name: 'series1',
+          data: [31, 40, 28, 51, 42, 109, 100],
+        },
+        {
+          name: 'series2',
+          data: [11, 32, 45, 32, 34, 52, 41],
+        },
+      ]
+      if (value == 'day') {
+        tempChartDatas = [
+          {
+            name: 'region1',
+            data: [31, 40, 28, 51, 42, 109, 100],
+          },
+          {
+            name: 'region2',
+            data: [11, 32, 45, 32, 34, 52, 41],
+          },
+        ]
+      } else if (value == 'month') {
+        tempChartDatas = [
+          {
+            name: 'series1',
+            data: [31, 40, 28, 51, 42, 109, 100, 20, 40, 10, 11, 12],
+          },
+          {
+            name: 'series2',
+            data: [11, 32, 45, 32, 34, 52, 41, 40, 20, 43, 55, 21],
+          },
+        ]
+      } else if (value == 'year') {
+        tempChartDatas = [
+          {
+            name: 'region1',
+            data: [31, 40, 28, 51, 42, 109, 100],
+          },
+          {
+            name: 'region2',
+            data: [11, 32, 45, 32, 34, 52, 41],
+          },
+        ]
+      }
+      this.series = tempChartDatas
+    },
+  },
+  watch: {
+    viewBy: {
+      immediate: true,
+      handler(value) {
+        this.createChartOptions(value)
+        this.createChartDatas(value)
+      },
+    },
   },
 }
 </script>
