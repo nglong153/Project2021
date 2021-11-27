@@ -49,6 +49,11 @@ const routes = [
     component: () => import('@/views/pages/real-estate-compare/RealEstateCompare.vue'),
   },
   {
+    path: '/pages/real-estate-detail',
+    name: 'real-estate-detail',
+    component: () => import('@/views/pages/real-estate-detail/RealEstateDetail.vue'),
+  },
+  {
     path: '/pages/login',
     name: 'pages-login',
     component: () => import('@/views/pages/Login.vue'),

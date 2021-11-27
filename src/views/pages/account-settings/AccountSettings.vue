@@ -15,7 +15,7 @@
     </v-card-actions>
     <v-card-text>
       <!-- Chart -->
-      <vue-apex-charts :options="chartOptions" :series="series" height="210"></vue-apex-charts>
+      <vue-apex-charts :options="areaChartOptions" :series="areaChartDatas" height="210"></vue-apex-charts>
     </v-card-text>
   </v-card>
 </template>
@@ -32,8 +32,8 @@ export default {
   },
   data: function () {
     return {
-      series: [],
-      chartOptions: {},
+      areaChartDatas: [],
+      areaChartOptions: {},
       viewBy: 'month',
     }
   },
@@ -49,6 +49,7 @@ export default {
     // tạo chartOptions cho ApexCharts
     createChartOptions(value) {
       let tempChartOptions = {
+        colors: ['#9155fd', '#3b3559'],
         chart: {
           height: 350,
           type: 'area',
@@ -89,7 +90,7 @@ export default {
       } else if (value == 'year') {
         tempChartOptions.xaxis.categories = ['2015', '2016', '2017', '2018', '2019', '2020', '2021']
       }
-      this.chartOptions = tempChartOptions
+      this.areaChartOptions = tempChartOptions
     },
 
     createChartDatas(value) {
@@ -137,7 +138,7 @@ export default {
           },
         ]
       }
-      this.series = tempChartDatas
+      this.areaChartDatas = tempChartDatas
     },
   },
   watch: {
