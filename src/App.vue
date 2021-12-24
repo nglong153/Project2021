@@ -1,6 +1,10 @@
 <template>
-  <component :is="resolveLayout">
-    <router-view></router-view>
+  <component :is="resolveLayout" >
+     <v-scroll-y-transition>
+      <router-view></router-view>
+     </v-scroll-y-transition>
+    
+    
   </component>
 </template>
 
@@ -33,3 +37,7 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+
+</style>

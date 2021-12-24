@@ -18,7 +18,7 @@
             ></v-img>
 
             <h2 class="text-2xl font-weight-semibold">
-              Materio
+              Xemdat.vn
             </h2>
           </router-link>
         </v-card-title>

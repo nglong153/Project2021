@@ -28,7 +28,7 @@
 
           <!-- Right Content -->
           <a
-            href="https://github.com/themeselection/materio-vuetify-vuejs-admin-template-free"
+            href="https://github.com/nglong153"
             target="_blank"
             rel="nofollow"
           >
@@ -52,9 +52,15 @@
     </v-app-bar>
 
     <v-main>
-      <div class="app-content-container boxed-container pa-6">
-        <slot></slot>
-      </div>
+      <v-row class="app-content-container boxed-container pa-6">
+        <v-col cols="10">
+          <slot></slot>
+        </v-col>
+        <v-col cols="2" class="py-3 pa-0">
+          <v-img min-height="600" src="https://s1.cdn.batdongsan.vn/upload/file/2021/11/0001/e899487051ef99b1c0fe.jpg">
+          </v-img>
+        </v-col>
+      </v-row>
     </v-main>
 
     <v-footer
@@ -69,27 +75,10 @@
         <div class="mx-6 d-flex justify-space-between">
           <span>
             &copy; 2021 <a
-              href="https://themeselection.com"
               class="text-decoration-none"
               target="_blank"
-            >ThemeSelection</a></span>
-          <span class="d-sm-inline d-none">
-            <a
-              href="https://themeselection.com/products/category/download-free-admin-templates/"
-              target="_blank"
-              class="me-6 text--secondary text-decoration-none"
-            >Freebies</a>
-            <a
-              href="https://themeselection.com/blog/"
-              target="_blank"
-              class="me-6 text--secondary text-decoration-none"
-            >Blog</a>
-            <a
-              href="https://github.com/themeselection/materio-vuetify-vuejs-admin-template-free/blob/main/LICENSE"
-              target="_blank"
-              class="text--secondary text-decoration-none"
-            >MIT Licence</a>
-          </span>
+            >UET</a></span>
+         
         </div>
       </div>
     </v-footer>

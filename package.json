@@ -1,29 +1,8 @@
 {
-  "name": "materio-free-vuetify-vuejs-admin-template",
-  "description": "Production ready carefully crafted most comprehensive admin template",
+  "name": "XemDat.vn",
+  "description": "Trang chu xemdat.vn",
   "license": "MIT",
   "version": "1.0.3",
-  "author": {
-    "name": "ThemeSelection",
-    "url": "https://themeselection.com/"
-  },
-  "bugs": {
-    "url": "https://github.com/themeselection/materio-vuetify-vuejs-admin-template-free/issues"
-  },
-  "private": false,
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/themeselection/materio-vuetify-vuejs-admin-template-free"
-  },
-  "homepage": "https://themeselection.com/demo/materio-vuetify-vuejs-admin-template-free/demo/",
-  "keywords": [
-    "free template",
-    "vuejs admin",
-    "free admin template",
-    "free vuejs theme",
-    "free vuejs admin",
-    "free vuejs template"
-  ],
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -34,9 +13,11 @@
     "@vue/composition-api": "^1.3.3",
     "@vuetify/cli-plugin-utils": "^0.0.9",
     "apexcharts": "^3.27.3",
+    "axios": "^0.24.0",
     "core-js": "^3.6.5",
     "vue": "^2.6.11",
     "vue-apexcharts": "^1.6.2",
+    "vue-axios": "^3.4.0",
     "vue-router": "^3.2.0",
     "vuetify": "^2.4.0",
     "vuex": "^3.4.0"
