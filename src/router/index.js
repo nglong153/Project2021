@@ -27,6 +27,7 @@ const routes = [
     path: '/pages/real-estate-detail',
     name: 'real-estate-detail',
     component: () => import('@/views/pages/real-estate-detail/RealEstateDetail.vue'),
+    props: route => ({ districtId: route.query.districtId, cityId : route.query.cityiD})
   },
   {
     path: '/pages/login',

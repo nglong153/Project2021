@@ -28,7 +28,7 @@
 
     <!-- Navigation Items -->
     <v-list expand shaped class="vertical-nav-menu-items pr-5">
-      <!-- <nav-menu-link title="Dashboard" :to="{ name: 'dashboard' }" :icon="icons.mdiHomeOutline"></nav-menu-link> -->
+      <nav-menu-link title="Tổng quan khu vực" :to="{ name: 'dashboard' }" :icon="icons.mdiHomeOutline"></nav-menu-link>
      
       <nav-menu-link title="So sánh" :to="{ name: 'real-estate-compare' }" :icon="icons.mdiFileCompare">
       </nav-menu-link>

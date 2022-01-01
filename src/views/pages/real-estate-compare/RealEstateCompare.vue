@@ -45,9 +45,7 @@
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-radio-group v-model="viewBy" row @change="viewByChange">
-              <v-radio label="ngày" value="day"> </v-radio>
               <v-radio label="tháng" value="month"> </v-radio>
-              <v-radio label="năm" value="year"> </v-radio>
             </v-radio-group>
           </v-card-actions>
           <v-card-text>
@@ -84,7 +82,7 @@ export default {
     const ins = getCurrentInstance()?.proxy
     const $vuetify = ins && ins.$vuetify ? ins.$vuetify : null
     const customChartColor = $vuetify.theme.isDark ? '#3b3559' : '#f5f5f5'
-    const baseUrl = 'http://20.89.155.32:3000/api'
+    const baseUrl = 'http://20.89.155.32/api'
     const chartOptions = {
       colors: [$vuetify.theme.currentTheme.primary, '#3b3559'],
       chart: {
@@ -135,7 +133,7 @@ export default {
         wardId: '5e5501cbeb80a7245175e13b',
         cityName: 'Hà Nội',
         districtName: 'Hai Bà Trưng',
-        wardName: 'Hai Bà Trưng',
+        wardName: 'Phố Huế',
       },
       secondSelectedLocationObject: {
         cityId: '5e5501caeb80a7245175dddb',
@@ -269,58 +267,37 @@ export default {
     // compare :
     compare() {
       if (this.checkLocationValid()) {
-        this.loading = true;
-        this.expand = false;
+        let tempBarChartData = [
+          {
+            name: this.firstSelectedLocationString,
+            data: [44, 55],
+          },
+          {
+            name: this.secondSelectedLocationString,
+            data: [53, 32],
+          },
+        ]
+        let tempAreaChartDatas = [
+          {
+            name: 'series1',
+            data: [31, 40, 28, 51, 42, 109, 100, 20, 40, 10, 11, 12],
+          },
+          {
+            name: 'series2',
+            data: [11, 32, 45, 32, 34, 52, 41, 40, 20, 43, 55, 21],
+          },
+        ]
+        this.loading = true
+        this.expand = false
         this.firstSelectedLocationString = this.buildLocationString(this.firstSelectedLocationObject)
         this.secondSelectedLocationString = this.buildLocationString(this.secondSelectedLocationObject)
-        this.setNameForChartDatas()
-        let firstLocationHouse =
-          'http://20.89.155.32:3000/api/post/average-price?wardId=' +
-          this.firstSelectedLocationObject.wardId +
-          '&districtId=' +
-          this.firstSelectedLocationObject.districtId +
-          '&cityId=' +
-          this.firstSelectedLocationObject.cityId +
-          '&type=HOUSE'
-        let firstLocationApartment =
-          'http://20.89.155.32:3000/api/post/average-price?wardId=' +
-          this.firstSelectedLocationObject.wardId +
-          '&districtId=' +
-          this.firstSelectedLocationObject.districtId +
-          '&cityId=' +
-          this.firstSelectedLocationObject.cityId +
-          '&type=APARTMENT'
-        let secondLocationHouse =
-          'http://20.89.155.32:3000/api/post/average-price?wardId=' +
-          this.secondSelectedLocationObject.wardId +
-          '&districtId=' +
-          this.secondSelectedLocationObject.districtId +
-          '&cityId=' +
-          this.secondSelectedLocationObject.cityId +
-          '&type=HOUSE'
-        let secondLocationApartment =
-          'http://20.89.155.32:3000/api/post/average-price?wardId=' +
-          this.secondSelectedLocationObject.wardId +
-          '&districtId=' +
-          this.secondSelectedLocationObject.districtId +
-          '&cityId=' +
-          this.secondSelectedLocationObject.cityId +
-          '&type=APARTMENT'
 
-        let firstLocationChangeByTime =
-          'http://20.89.155.32:3000/api/post/average-price-in-year?districtId=' +
-          this.firstSelectedLocationObject.districtId +
-          '&cityId=' +
-          this.firstSelectedLocationObject.cityId +
-          '&year=2021&' +
-          this.firstSelectedLocationObject.wardId
-        let secondLocationChangeByTime =
-          'http://20.89.155.32:3000/api/post/average-price-in-year?districtId=' +
-          this.secondSelectedLocationObject.districtId +
-          '&cityId=' +
-          this.secondSelectedLocationObject.cityId +
-          '&year=2021&' +
-          this.secondSelectedLocationObject.wardId
+        let firstLocationHouse = this.buildFirstObjectUlr('average-price', '&type=HOUSE')
+        let firstLocationApartment = this.buildFirstObjectUlr('average-price', '&type=APARTMENT')
+        let secondLocationHouse = this.buildSecondObjectUrl('average-price', '&type=HOUSE')
+        let secondLocationApartment = this.buildSecondObjectUrl('average-price', '&type=APARTMENT')
+        let firstLocationChangeByTime = this.buildFirstObjectUlr('average-price-in-year', '&year=2021')
+        let secondLocationChangeByTime = this.buildSecondObjectUrl('average-price-in-year', '&year=2021')
 
         const requestOne = axios.get(firstLocationHouse)
         const requestTwo = axios.get(firstLocationApartment)
@@ -328,9 +305,9 @@ export default {
         const requestFour = axios.get(secondLocationApartment)
         const requestFive = axios.get(firstLocationChangeByTime)
         const requestSix = axios.get(secondLocationChangeByTime)
-        console.log(this.areaChartDatas);
+
         axios
-          .all([requestOne, requestTwo, requestThree, requestFour,requestFive,requestSix])
+          .all([requestOne, requestTwo, requestThree, requestFour, requestFive, requestSix])
           .then(
             axios.spread((...responses) => {
               this.loading = false
@@ -338,28 +315,35 @@ export default {
               const responseTwo = responses[1]
               const responseThree = responses[2]
               const responseFour = responses[3]
-              const responseFive = responses[4];
-              const responseSix = responses[5];
-              console.log(responseSix.data.data);
+              const responseFive = responses[4]
+              const responseSix = responses[5]
+
               if (responseOne && responseOne.data) {
-                this.barChartDatas[0].data[0] = responseOne.data.data.averagePrice
+                tempBarChartData[0].data[0] = responseOne.data.data.averagePrice
               }
               if (responseTwo && responseTwo.data) {
-                this.barChartDatas[0].data[1] = responseTwo.data.data.averagePrice
-              }
-              if (responseThree && responseThree.data) {
-                this.barChartDatas[1].data[0] = responseThree.data.data.averagePrice
-              }
-              if (responseFour && responseFour.data) {
-                this.barChartDatas[1].data[1] = responseFour.data.data.averagePrice
-              }
-              if (responseFive && responseFive.data) {
-                this.areaChartDatas[0].data = responseFive.data.data
-              }
-              if (responseSix && responseSix.data) {
-                this.areaChartDatas[1].data = responseSix.data.data
+                tempBarChartData[0].data[1] = responseTwo.data.data.averagePrice
               }
 
+              if (responseThree && responseThree.data) {
+                tempBarChartData[1].data[0] = responseThree.data.data.averagePrice
+              }
+              if (responseFour && responseFour.data) {
+                tempBarChartData[1].data[1] = responseFour.data.data.averagePrice
+              }
+
+              if (responseFive && responseFive.data) {
+                tempAreaChartDatas[0].data = responseFive.data.data
+              }
+              if (responseSix && responseSix.data) {
+                tempAreaChartDatas[1].data = responseSix.data.data
+              }
+              // rename of the series
+              this.setNameForChartDatas(tempBarChartData, tempAreaChartDatas)
+              // set data for barchart -> for reactive of vue
+              this.barChartDatas = tempBarChartData
+              // set data for areachart -> for reactive of vue
+              this.areaChartDatas = tempAreaChartDatas
               this.expand = true
             }),
           )
@@ -369,21 +353,34 @@ export default {
       }
     },
     setFirstLocation(type, value) {
-      this.firstSelectedLocationObject[type + 'Id'] = value.id ? value.id : null
-      this.firstSelectedLocationObject[type + 'Name'] = value.name ? value.name : null
+      this.firstSelectedLocationObject[type + 'Id'] = value ? value.id : null
+      this.firstSelectedLocationObject[type + 'Name'] = value ? value.name : null
     },
     setSecondLocation(type, value) {
-      this.secondSelectedLocationObject[type + 'Id'] = value.id ? value.id : null
-      this.secondSelectedLocationObject[type + 'Name'] = value.name ? value.name : null
+      this.secondSelectedLocationObject[type + 'Id'] = value ? value.id : null
+      this.secondSelectedLocationObject[type + 'Name'] = value ? value.name : null
     },
     buildLocationString(locationObject) {
-      return locationObject.wardName + ', ' + locationObject.districtName + ', ' + locationObject.cityName
+      let returnString = ''
+      if (locationObject.wardName) {
+        returnString += locationObject.wardName + ','
+      }
+      if (locationObject.districtName) {
+        returnString += locationObject.districtName + ','
+      }
+      if (locationObject.cityName) {
+        returnString += locationObject.cityName
+      }
+      return returnString
     },
-    setNameForChartDatas() {
-      this.barChartDatas[0].name = this.firstSelectedLocationString
-      this.barChartDatas[1].name = this.secondSelectedLocationString
-      this.areaChartDatas[0].name = this.firstSelectedLocationString
-      this.areaChartDatas[1].name = this.secondSelectedLocationString
+    setNameForChartDatas(tempBarChart, tempAreaChart) {
+      
+        tempBarChart[0].name = this.firstSelectedLocationString
+        tempBarChart[1].name = this.secondSelectedLocationString
+  
+        tempAreaChart[0].name = this.firstSelectedLocationString
+        tempAreaChart[1].name = this.secondSelectedLocationString
+      
     },
     checkLocationValid() {
       if (
@@ -393,6 +390,38 @@ export default {
         return false
       }
       return true
+    },
+    buildFirstObjectUlr(controller, type = null) {
+      let baseUrl = 'http://20.89.155.32/api/post/' + controller + '?'
+      if (this.firstSelectedLocationObject.wardId) {
+        baseUrl += 'wardId=' + this.firstSelectedLocationObject.wardId + '&'
+      }
+      if (this.firstSelectedLocationObject.districtId) {
+        baseUrl += 'districtId=' + this.firstSelectedLocationObject.districtId + '&'
+      }
+      if (this.firstSelectedLocationObject.cityId) {
+        baseUrl += 'cityId=' + this.firstSelectedLocationObject.cityId
+      }
+      if (type != null) {
+        baseUrl += type
+      }
+      return baseUrl
+    },
+    buildSecondObjectUrl(controller, type = null) {
+      let baseUrl = 'http://20.89.155.32/api/post/' + controller + '?'
+      if (this.secondSelectedLocationObject.wardId) {
+        baseUrl += 'wardId=' + this.secondSelectedLocationObject.wardId + '&'
+      }
+      if (this.secondSelectedLocationObject.districtId) {
+        baseUrl += 'districtId=' + this.secondSelectedLocationObject.districtId + '&'
+      }
+      if (this.secondSelectedLocationObject.cityId) {
+        baseUrl += 'cityId=' + this.secondSelectedLocationObject.cityId
+      }
+      if (type != null) {
+        baseUrl += type
+      }
+      return baseUrl
     },
   },
   watch: {
