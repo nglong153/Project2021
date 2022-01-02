@@ -1,7 +1,12 @@
 <template>
   <v-row>
     <v-col cols="12" md="12">
-      <choose-location-card :hidden="false"></choose-location-card>
+      <choose-location-card
+        :hidden="false"
+        @choosed="setLocation"
+        @choosePriceRange="handleChoosePriceRange"
+        @chooseAreaRange="handleChooseAreaRange"
+      ></choose-location-card>
     </v-col>
     <v-layout row justify-center>
       <v-dialog v-model="loading" persistent fullscreen content-class="loading-dialog">
@@ -15,76 +20,150 @@
     <v-col cols="12" md="12">
       <v-btn @click="handleViewDashboard" color="primary">Xem tổng quan</v-btn>
     </v-col>
+    <!-- Biểu đồ giá trung bình theo loại bất động sản -->
+    <v-slide-y-transition mode="out-in">
+      <v-col cols="12" md="12" v-show="viewDashboard">
+        <v-card>
+          <v-card-title class="align-start">
+            <span>Biểu đồ giá trung bình theo loại bất động sản</span>
+            <v-spacer></v-spacer>
+          </v-card-title>
+          <v-card-text>
+            <vue-apex-charts :options="chartOptions" :series="barChartDatas" height="200"></vue-apex-charts>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-slide-y-transition>
+    <!-- Biểu đồ giá trung bình khu vực theo thời gian -->
+    <v-slide-y-reverse-transition mode="out-in">
+      <v-col cols="12" md="12" v-show="viewDashboard">
+        <v-card>
+          <v-card-title class="align-start">
+            <span>Biểu đồ giá trung bình khu vực theo thời gian</span>
+            <v-spacer></v-spacer>
+          </v-card-title>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-radio-group v-model="viewBy" row @change="viewByChange">
+              <v-radio label="Nhà nguyên căn" value="house"> </v-radio>
+              <v-radio label="Chung cư" value="apartment"> </v-radio>
+            </v-radio-group>
+          </v-card-actions>
+          <v-card-text>
+            <!-- Chart -->
+            <vue-apex-charts :options="areaChartOptions" :series="areaChartDatas" height="210"></vue-apex-charts>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-slide-y-reverse-transition>
   </v-row>
 </template>
 
 <script>
 // eslint-disable-next-line object-curly-newline
-import { mdiPoll, mdiLabelVariantOutline, mdiCurrencyUsd, mdiHelpCircleOutline } from '@mdi/js'
-import StatisticsCardVertical from '@/components/statistics-card/StatisticsCardVertical.vue'
+import VueApexCharts from 'vue-apexcharts'
 import ChooseLocationCard from '@/components/choose-location-card/ChooseLocationCard.vue'
 import axios from 'axios'
-import VueApexCharts from 'vue-apexcharts'
+// eslint-disable-next-line object-curly-newline
 import { getCurrentInstance } from '@vue/composition-api'
 
 // demos
 
 export default {
   components: {
-    StatisticsCardVertical,
     ChooseLocationCard,
+    VueApexCharts,
   },
   setup() {
-    const totalProfit = {
-      statTitle: 'Total Profit',
-      icon: mdiPoll,
-      color: 'success',
-      subtitle: 'Weekly Project',
-      statistics: '$25.6k',
-      change: '+42%',
+    const ins = getCurrentInstance()?.proxy
+    const $vuetify = ins && ins.$vuetify ? ins.$vuetify : null
+    let customChartColor = $vuetify.theme.isDark ? '#f5f5f5' : '#3b3559'
+    const currentTheme = $vuetify.theme.isDark
+    const baseUrl = 'http://20.89.155.32/api'
+    const chartOptions = {
+      colors: [$vuetify.theme.currentTheme.primary, '#56ca00'],
+      chart: {
+        type: 'bar',
+        height: 100,
+      },
+      plotOptions: {
+        bar: {
+          horizontal: true,
+          dataLabels: {
+            position: 'top',
+            offset: -6,
+          },
+        },
+      },
+      dataLabels: {
+        enabled: false,
+        style: {
+          colors: ['#fff'],
+        },
+        offsetX: 30,
+      },
+      stroke: {
+        show: true,
+        width: 1,
+        colors: ['#fff'],
+      },
+      tooltip: {
+        shared: true,
+        intersect: false,
+      },
+      xaxis: {
+        categories: ['Nhà nguyên căn', 'Chung cư'],
+      },
     }
-
-    const totalSales = {
-      statTitle: 'Refunds',
-      icon: mdiCurrencyUsd,
-      color: 'secondary',
-      subtitle: 'Past Month',
-      statistics: '$78',
-      change: '-15%',
+    const areaChartOptions = {
+      colors: [$vuetify.theme.currentTheme.primary, '#56ca00'],
+      chart: {
+        height: 350,
+        type: 'area',
+      },
+      dataLabels: {
+        enabled: false,
+      },
+      stroke: {
+        curve: 'smooth',
+      },
+      xaxis: {
+        type: 'category',
+        categories: [
+          'Tháng 1',
+          'Tháng 2',
+          'Tháng 3',
+          'Tháng 4',
+          'Tháng 5',
+          'Tháng 6',
+          'Tháng 7',
+          'Tháng 8',
+          'Tháng 9',
+          'Tháng 10',
+          'Tháng 11',
+          'Tháng 12',
+        ],
+      },
+      tooltip: {
+        x: {
+          format: 'dd/MM/yy HH:mm',
+        },
+      },
     }
-
-    // vertical card options
-    const newProject = {
-      statTitle: 'New Project',
-      icon: mdiLabelVariantOutline,
-      color: 'primary',
-      subtitle: 'Yearly Project',
-      statistics: '862',
-      change: '-18%',
-    }
-
-    const salesQueries = {
-      statTitle: 'Sales Quries',
-      icon: mdiHelpCircleOutline,
-      color: 'warning',
-      subtitle: 'Last week',
-      statistics: '15',
-      change: '-18%',
-    }
-
     return {
-      totalProfit,
-      totalSales,
-      newProject,
-      salesQueries,
+      chartOptions,
+      areaChartOptions,
+      baseUrl,
+      customChartColor,
+      currentTheme,
     }
   },
   data: function () {
     return {
       areaChartDatas: [],
-      areaChartOptions: {},
-      viewBy: 'month',
-      showDetail: false,
+      barChartDatas: [],
+      viewBy: 'house',
+      viewDashboard: false,
       selectedLocationObject: {
         cityId: '5e5501caeb80a7245175dddb',
         districtId: '5e5501caeb80a7245175de2d',
@@ -94,16 +173,23 @@ export default {
         wardName: 'Phố Huế',
       },
       locationString: '',
-      loading:false
+      loading: false,
+      locationChangeByTimeApartmentPriceArr: [],
+      locationChangeByTimeHousePriceArr: [],
+      areaRange: [],
+      priceRange: [],
     }
   },
-  methods:{
+  methods: {
     setLocation(type, value) {
       this.selectedLocationObject[type + 'Id'] = value ? value.id : null
       this.selectedLocationObject[type + 'Name'] = value ? value.name : null
     },
     buildLocationString(locationObject) {
       let returnString = ''
+      if (locationObject.wardName){
+         returnString += locationObject.wardName + ','
+      }
       if (locationObject.districtName) {
         returnString += locationObject.districtName + ','
       }
@@ -119,28 +205,31 @@ export default {
           data: [44, 55],
         },
       ]
-
+      let tempAreaChartDatas = [
+          {
+            name: this.locationString,
+            data: [31, 40, 28, 51, 42, 109, 100, 20, 40, 10, 11, 12],
+          },
+        ]
       this.loading = true
       this.showDetail = false
       this.locationString = this.buildLocationString(this.selectedLocationObject)
 
       let locationHouse = this.buildUlr('/post/average-price', '&type=HOUSE')
       let locationApartment = this.buildUlr('/post/average-price', '&type=APARTMENT')
-      let listTempProjects = this.buildUlr('/project/list-project');
-      let listTempPosts = this.buildUlr('/post/list','&page=0&limit=50')
-
+      let listTempProjects = this.buildUlr('/post/average-price-in-year', '&year=2021&type=HOUSE')
+      let listTempPosts = this.buildUlr('/post/average-price-in-year', '&year=2021&type=APARTMENT')
       const requestOne = axios.get(locationHouse)
       const requestTwo = axios.get(locationApartment)
-      // const requestThree = axios.get(secondLocationHouse)
-      // const requestFour = axios.get(secondLocationApartment)
       const requestThree = axios.get(listTempProjects)
       const requestFour = axios.get(listTempPosts)
 
       axios
-        .all([requestOne, requestTwo , requestThree, requestFour])
+        .all([requestOne, requestTwo, requestThree, requestFour])
         .then(
           axios.spread((...responses) => {
             this.loading = false
+
             const responseOne = responses[0]
             const responseTwo = responses[1]
             const responseThree = responses[2]
@@ -148,27 +237,30 @@ export default {
             if (responseOne && responseOne.data) {
               tempBarChartData[0].data[0] = responseOne.data.data.averagePrice
             }
+          
             if (responseTwo && responseTwo.data) {
               tempBarChartData[0].data[1] = responseTwo.data.data.averagePrice
             }
 
             if (responseThree && responseThree.data) {
-              this.listProjects = responseThree.data.data
+              tempAreaChartDatas[0].data = responseThree.data.data
+              this.locationChangeByTimeHousePriceArr = responseThree.data.data
             }
             if (responseFour && responseFour.data) {
               this.listPosts = responseFour.data.data
+              this.locationChangeByTimeApartmentPriceArr = responseFour.data.data
             }
 
-      
+            console.log(tempBarChartData);
             // rename of the series
-            this.setNameForChartDatas(tempBarChartData)
+            this.setNameForChartDatas(tempBarChartData,tempAreaChartDatas)
             // set data for barchart -> for reactive of vue
-            this.chartData = tempBarChartData
-            this.showDetail = true
+            this.barChartDatas = tempBarChartData
+            this.areaChartDatas = tempAreaChartDatas
+            this.viewDashboard = true
           }),
         )
         .catch(errors => {})
-      
     },
     buildUlr(controller, type = null) {
       let baseUrl = 'http://20.89.155.32/api' + controller + '?'
@@ -181,10 +273,46 @@ export default {
       if (type != null) {
         baseUrl += type
       }
+      if (this.priceRange !== undefined && this.priceRange.length > 0) {
+        baseUrl += `&priceFrom=${this.priceRange[0]*1000000000}&priceTo=${this.priceRange[1]*1000000000}`
+      }
+      if (this.areaRange !== undefined && this.areaRange.length > 0) {
+        baseUrl += `&areaFrom=${this.areaRange[0]}&areaTo=${this.areaRange[1]}`
+      }
       return baseUrl
     },
-    setNameForChartDatas(tempBarChart) {
-        tempBarChart[0].name = this.locationString;
+    setNameForChartDatas(tempBarChart,tempAreaChartDatas) {
+      tempBarChart[0].name = this.locationString
+      tempAreaChartDatas[0].name = this.locationString;
+    },
+    viewByChange(value) {
+      this.createChartDatas(value)
+    },
+    createChartDatas(value) {
+      let tempChartDatas = []
+
+      if (value == 'apartment') {
+        tempChartDatas = [
+          {
+            name: this.locationString,
+            data: this.locationChangeByTimeApartmentPriceArr,
+          },
+        ]
+      } else if (value == 'house') {
+        tempChartDatas = [
+          {
+            name: this.locationString,
+            data: this.locationChangeByTimeHousePriceArr,
+          },
+        ]
+      }
+      this.areaChartDatas = tempChartDatas
+    },
+    handleChoosePriceRange(value) {
+      this.priceRange = value
+    },
+    handleChooseAreaRange(value) {
+      this.areaRange = value
     },
   },
 }

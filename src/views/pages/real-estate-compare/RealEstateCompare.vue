@@ -45,7 +45,8 @@
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-radio-group v-model="viewBy" row @change="viewByChange">
-              <v-radio label="tháng" value="month"> </v-radio>
+              <v-radio label="Nhà nguyên căn" value="house"> </v-radio>
+              <v-radio label="Chung cư" value="apartment"> </v-radio>
             </v-radio-group>
           </v-card-actions>
           <v-card-text>
@@ -81,10 +82,11 @@ export default {
   setup() {
     const ins = getCurrentInstance()?.proxy
     const $vuetify = ins && ins.$vuetify ? ins.$vuetify : null
-    const customChartColor = $vuetify.theme.isDark ? '#3b3559' : '#f5f5f5'
+    let customChartColor = $vuetify.theme.isDark ?  '#f5f5f5' :'#3b3559'
+    const currentTheme =  $vuetify.theme.isDark;
     const baseUrl = 'http://20.89.155.32/api'
     const chartOptions = {
-      colors: [$vuetify.theme.currentTheme.primary, '#3b3559'],
+      colors: [$vuetify.theme.currentTheme.primary, '#56ca00'],
       chart: {
         type: 'bar',
         height: 100,
@@ -118,10 +120,45 @@ export default {
         categories: ['Nhà nguyên căn', 'Chung cư'],
       },
     }
-
+    const areaChartOptions =  {
+        colors: [$vuetify.theme.currentTheme.primary, '#56ca00'],
+        chart: {
+          height: 350,
+          type: 'area',
+        },
+        dataLabels: {
+          enabled: false,
+        },
+        stroke: {
+          curve: 'smooth',
+        },
+        xaxis: {
+          type: 'category',
+          categories: ['Tháng 1',
+          'Tháng 2',
+          'Tháng 3',
+          'Tháng 4',
+          'Tháng 5',
+          'Tháng 6',
+          'Tháng 7',
+          'Tháng 8',
+          'Tháng 9',
+          'Tháng 10',
+          'Tháng 11',
+          'Tháng 12',],
+        },
+        tooltip: {
+          x: {
+            format: 'dd/MM/yy HH:mm',
+          },
+        },
+      }
     return {
       chartOptions,
+      areaChartOptions,
       baseUrl,
+      customChartColor,
+      currentTheme
     }
   },
 
@@ -156,109 +193,48 @@ export default {
         },
       ],
       areaChartDatas: [],
-      areaChartOptions: {},
-      viewBy: 'month',
+      viewBy: 'house',
       expand: false,
       loading: false,
       snackbar: false,
+      firstLocationChangeByTimeHousePriceArr : [],
+      firstLocationChangeByTimeApartmentPriceArr :[],
+      secondLocationChangeByTimeHousePriceArr :[],
+      secondLocationChangeByTimeApartmentPriceArr :[],
+      darkTheme : this.$vuetify.theme.isDark
     }
   },
 
   methods: {
     viewByChange(value) {
-      this.createChartOptions(value)
       this.createChartDatas(value)
     },
 
-    // tạo chartOptions cho ApexCharts
-    createChartOptions(value) {
-      let tempChartOptions = {
-        colors: ['#9155fd', '#3b3559'],
-        chart: {
-          height: 350,
-          type: 'area',
-        },
-        dataLabels: {
-          enabled: false,
-        },
-        stroke: {
-          curve: 'smooth',
-        },
-        xaxis: {
-          type: 'category',
-          categories: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'],
-        },
-        tooltip: {
-          x: {
-            format: 'dd/MM/yy HH:mm',
-          },
-        },
-      }
-      if (value == 'day') {
-        tempChartOptions.xaxis.categories = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
-      } else if (value == 'month') {
-        tempChartOptions.xaxis.categories = [
-          'Tháng 1',
-          'Tháng 2',
-          'Tháng 3',
-          'Tháng 4',
-          'Tháng 5',
-          'Tháng 6',
-          'Tháng 7',
-          'Tháng 8',
-          'Tháng 9',
-          'Tháng 10',
-          'Tháng 11',
-          'Tháng 12',
-        ]
-      } else if (value == 'year') {
-        tempChartOptions.xaxis.categories = ['2015', '2016', '2017', '2018', '2019', '2020', '2021']
-      }
-      this.areaChartOptions = tempChartOptions
-    },
     // tạo dữ liệu cho area chart
     createChartDatas(value) {
-      let tempChartDatas = [
-        {
-          name: 'series1',
-          data: [31, 40, 28, 51, 42, 109, 100],
-        },
-        {
-          name: 'series2',
-          data: [11, 32, 45, 32, 34, 52, 41],
-        },
-      ]
-      if (value == 'day') {
+      let tempChartDatas = [];
+
+      if (value == 'apartment') {
         tempChartDatas = [
           {
-            name: 'region1',
-            data: [31, 40, 28, 51, 42, 109, 100],
+            name: this.firstSelectedLocationString,
+            data: this.firstLocationChangeByTimeApartmentPriceArr,
           },
           {
-            name: 'region2',
-            data: [11, 32, 45, 32, 34, 52, 41],
+            name: this.secondSelectedLocationString,
+            data: this.secondLocationChangeByTimeApartmentPriceArr,
           },
         ]
-      } else if (value == 'month') {
+      } 
+      else if (value == 'house'){
         tempChartDatas = [
           {
-            name: 'series1',
-            data: [31, 40, 28, 51, 42, 109, 100, 20, 40, 10, 11, 12],
+            name: this.firstSelectedLocationString,
+            data: this.firstLocationChangeByTimeHousePriceArr,
           },
           {
-            name: 'series2',
-            data: [11, 32, 45, 32, 34, 52, 41, 40, 20, 43, 55, 21],
-          },
-        ]
-      } else if (value == 'year') {
-        tempChartDatas = [
-          {
-            name: 'region1',
-            data: [31, 40, 28, 51, 42, 109, 100],
-          },
-          {
-            name: 'region2',
-            data: [11, 32, 45, 32, 34, 52, 41],
+            name: this.secondSelectedLocationString,
+            data: this.secondLocationChangeByTimeHousePriceArr,
           },
         ]
       }
@@ -296,18 +272,24 @@ export default {
         let firstLocationApartment = this.buildFirstObjectUlr('average-price', '&type=APARTMENT')
         let secondLocationHouse = this.buildSecondObjectUrl('average-price', '&type=HOUSE')
         let secondLocationApartment = this.buildSecondObjectUrl('average-price', '&type=APARTMENT')
-        let firstLocationChangeByTime = this.buildFirstObjectUlr('average-price-in-year', '&year=2021')
-        let secondLocationChangeByTime = this.buildSecondObjectUrl('average-price-in-year', '&year=2021')
+        let firstLocationChangeByTimeHousePrice = this.buildFirstObjectUlr('average-price-in-year', '&year=2021&type=HOUSE')
+        let secondLocationChangeByTimeHousePrice = this.buildSecondObjectUrl('average-price-in-year', '&year=2021&type=HOUSE')
+        let firstLocationChangeByTimeApartmentPrice = this.buildFirstObjectUlr('average-price-in-year', '&year=2021&type=APARTMENT')
+        let secondLocationChangeByTimeApartmentPrice = this.buildSecondObjectUrl('average-price-in-year', '&year=2021&type=APARTMENT')
+
 
         const requestOne = axios.get(firstLocationHouse)
         const requestTwo = axios.get(firstLocationApartment)
         const requestThree = axios.get(secondLocationHouse)
         const requestFour = axios.get(secondLocationApartment)
-        const requestFive = axios.get(firstLocationChangeByTime)
-        const requestSix = axios.get(secondLocationChangeByTime)
+        const requestFive = axios.get(firstLocationChangeByTimeHousePrice)
+        const requestSix = axios.get(secondLocationChangeByTimeHousePrice)
+        const requestSeven = axios.get(firstLocationChangeByTimeApartmentPrice);
+        const requestEight = axios.get(secondLocationChangeByTimeApartmentPrice)
+
 
         axios
-          .all([requestOne, requestTwo, requestThree, requestFour, requestFive, requestSix])
+          .all([requestOne, requestTwo, requestThree, requestFour, requestFive, requestSix,requestSeven,requestEight])
           .then(
             axios.spread((...responses) => {
               this.loading = false
@@ -317,6 +299,8 @@ export default {
               const responseFour = responses[3]
               const responseFive = responses[4]
               const responseSix = responses[5]
+              const responseSeven = responses[6]
+              const responseEight = responses[7]
 
               if (responseOne && responseOne.data) {
                 tempBarChartData[0].data[0] = responseOne.data.data.averagePrice
@@ -333,10 +317,20 @@ export default {
               }
 
               if (responseFive && responseFive.data) {
+                this.viewBy  = 'house';
                 tempAreaChartDatas[0].data = responseFive.data.data
+                this.firstLocationChangeByTimeHousePriceArr =  responseFive.data.data
               }
               if (responseSix && responseSix.data) {
+                this.viewBy  = 'house';
                 tempAreaChartDatas[1].data = responseSix.data.data
+                this.secondLocationChangeByTimeHousePriceArr = responseSix.data.data
+              }
+              if (responseSeven && responseSeven.data) {
+                this.firstLocationChangeByTimeApartmentPriceArr = responseSeven.data.data
+              }
+              if (responseEight && responseEight.data) {
+                this.secondLocationChangeByTimeApartmentPriceArr = responseEight.data.data
               }
               // rename of the series
               this.setNameForChartDatas(tempBarChartData, tempAreaChartDatas)
@@ -392,7 +386,7 @@ export default {
       return true
     },
     buildFirstObjectUlr(controller, type = null) {
-      let baseUrl = 'http://20.89.155.32/api/post/' + controller + '?'
+      let baseUrl = this.baseUrl + '/post/' + controller + '?'
       if (this.firstSelectedLocationObject.wardId) {
         baseUrl += 'wardId=' + this.firstSelectedLocationObject.wardId + '&'
       }
@@ -428,10 +422,15 @@ export default {
     viewBy: {
       immediate: true,
       handler(value) {
-        this.createChartOptions(value)
         this.createChartDatas(value)
       },
     },
+    darkTheme :{
+      immediate: false,
+      handler(value){
+        console.log(value);
+      }
+    }
   },
 }
 </script>

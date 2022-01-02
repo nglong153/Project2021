@@ -16,7 +16,7 @@
         >
         </v-combobox>
       </v-col>
-      <v-col :cols="detailView ? 4 : 6" class="mb-6" v-if="!detailView">
+      <v-col :cols="detailView ? 6 : 4" class="mb-6" v-if="!detailView">
         <v-combobox
           :auto-select-first="true"
           :items="wards"
@@ -33,11 +33,12 @@
         <v-range-slider
           v-model="priceRange"
           label="Khoảng giá"
-          step="1"
+          step="0.1"
           min="0"
           max="100"
           :thumb-label="true"
           hint="tỷ"
+          @input="handleChoosePriceRange"
         ></v-range-slider>
       </v-col>
       <v-col cols="4" class="mb-6">
@@ -45,10 +46,11 @@
           v-model="areaRange"
           label="Khoảng diện tích"
           step="1"
-          min="0"
-          max="100"
+          min="10"
+          max="500"
           :thumb-label="true"
           hint="m2"
+          @input="handleChooseAreaRange"
         ></v-range-slider>
       </v-col>
     </v-card-actions>
@@ -175,6 +177,12 @@ export default {
     },
     handleChooseWard: function () {
       this.$emit('choosed', 'ward', this.selectedWardObject)
+    },
+    handleChoosePriceRange :function(){
+        this.$emit('choosePriceRange', this.priceRange)
+    },
+    handleChooseAreaRange :function(){
+      this.$emit('chooseAreaRange', this.areaRange)
     },
     parseResponse(data) {
       let tempArr = data
